@@ -1,0 +1,25 @@
+.etenant-stepper-container {
+  flex-direction: column !important;
+  margin-right: 10px;
+}
+
+.etenant-stepper-item {
+  margin-right: 10px !important;
+}
+
+.etenant-stepper-nav {
+  flex-direction: row !important;
+  justify-content: center;
+}
+
+.e-tenancy-pdf-preview-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.signature-modal-header {
+  display: flex;
+  flex-direction: column;
+}
+

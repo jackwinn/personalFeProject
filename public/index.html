@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="application-name" content="%REACT_APP_NAME%" />
+    <meta name="description" content="%REACT_APP_DESCRIPTION%" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700"
+    />
+    <title>%REACT_APP_NAME%</title>
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png" />
+    <link rel="stylesheet" id="layout-styles-anchor" href="%PUBLIC_URL%/splash-screen.css" />
+  </head>
+
+  <body id="kt_body" class="page-loading">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <!--begin::Theme mode setup on page load-->
+    <script>
+      let themeMode = 'system'
+
+      if (localStorage.getItem('kt_theme_mode_value')) {
+        themeMode = localStorage.getItem('kt_theme_mode_value')
+      }
+
+      if (themeMode === 'system') {
+        themeMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      }
+
+      document.documentElement.setAttribute('data-bs-theme', themeMode)
+
+      function showCurrentYear() {
+        document.write(new Date().getFullYear())
+      }
+    </script>
+    <!--end::Theme mode setup on page load-->
+
+    <div id="root"></div>
+
+    <!--begin::Loading markup-->
+    <div id="splash-screen" class="splash-screen">
+      <img
+        src="%PUBLIC_URL%/media/auth/iroomz_logo.svg"
+        class="dark-logo"
+        alt="iRoomz Portal Logo"
+      />
+      <img
+        src="%PUBLIC_URL%/media/auth/iroomz_logo.svg"
+        class="light-logo"
+        alt="iRoomz Portal Logo"
+      />
+      <!-- <span>Loading...</span> -->
+    </div>
+    <!--end::Loading markup-->
+
+    <div id="root-modals"></div>
+  </body>
+  <!-- <footer>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 6;
+        background-color: #f5f6fa;
+        height: 60px;
+        border-top: 1px dashed #e4e6ef;
+        color: #c3c7cd;
+        font-size: 10px;
+      "
+    >
+      <span id="siteseal">
+        Copyright © 2020-
+        <script>
+          showCurrentYear()
+        </script>
+        . The Next Six Sdn. Bhd. All rights reserved. &nbsp;
+        <script
+          async
+          type="text/javascript"
+          src="https://seal.godaddy.com/getSeal?sealID=IXQw1ZjGAcX64s2ZFSMIP7V8GxZsP5NVn7woE92nhsh0MoxTL0vv1MpLy8gB"
+        ></script>
+      </span>
+    </div>
+  </footer> -->
+</html>

@@ -1,0 +1,18 @@
+.eSign-canvas-wrap {
+ display: flex;
+ justify-content: center;
+}
+
+.signature-canvas {
+  width: 300px;
+  height: 150px;
+  object-fit: scale-down;
+  background: #f5f6fa;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px;
+}
+
+.eSign-tenant-mobile {
+  text-align: center;
+}

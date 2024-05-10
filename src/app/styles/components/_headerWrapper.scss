@@ -1,0 +1,14 @@
+//Header Wrapper
+.custom-app-header {
+    padding-top:15px;
+  }
+  
+  .mobile-logout-btn {
+    cursor: pointer;
+  }
+
+  @media screen and (min-width:$screen-tablet-max) { //991px
+    .custom-app-header {
+        display: none;
+      }
+  }

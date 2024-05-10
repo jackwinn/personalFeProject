@@ -1,0 +1,47 @@
+//CSS here applied globally
+
+//Fonts
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+body {
+  font-family: 'Rubik', sans-serif !important;
+  background-color: white !important;
+}
+
+// Packages
+@import 'slick-carousel/slick/slick.css';
+@import 'slick-carousel/slick/slick-theme.css';
+@import 'react-toastify/dist/ReactToastify.css';
+@import 'react-datepicker/dist/react-datepicker.css';
+// Variables
+@import './_variable';
+
+// Components
+@import './components/_headers';
+@import './components/_sidebar';
+@import './components/_headerWrapper';
+@import './components/_uploadAttachment';
+
+// Pages
+@import './pages/_authPage';
+@import './pages/_dashboardPage';
+@import './pages/_resetPasswordPage';
+@import './pages/_etenanciesPage';
+@import './pages/_userProfilePage';
+@import './pages/_changePasswordPage';
+@import './pages/eSignaturePage';
+;
+
+// Forms
+
+// Shared Classes
+.custom-date-picker-wrapper {
+  display: unset !important;
+}
+
+.table-overflow {
+  .infinite-scroll-component {
+    overflow: visible !important;
+    height: 100% !important;
+  }
+}
