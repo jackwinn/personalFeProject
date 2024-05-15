@@ -15,7 +15,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../redux/store'
 
 // page import 
-const ResetPasswordPage = lazy(() => import('../pages/ResetPassswordPage'))
+
 const ESignAuthPage = lazy(() => import('../pages/ESignAuthPage'))
 
 
@@ -33,8 +33,7 @@ const AppRoutes: FC = () => {
   return (
     <BrowserRouter basename={'/'}>
       <Routes>
-        <Route element={<App />}>
-          <Route path='/reset-password/:secretKey' element={<ResetPasswordPage />} />
+        <Route element={<App />}>         
           <Route path='/e-tenancies/signature/auth/:secretKey' element={<ESignAuthPage />} />
           {userSlice?._id ? (
             <>

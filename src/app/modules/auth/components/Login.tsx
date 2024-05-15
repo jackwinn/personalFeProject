@@ -44,21 +44,8 @@ export function Login(props: any) {
 
   const currentUrl = window.location.hostname;
 
-  useEffect(() => {
-    let newRole = "";
-
-    if (currentUrl.includes('admin')) newRole = "Admin";
-    else if (currentUrl.includes('landlord')) newRole = "Landlord";
-    else if (currentUrl.includes('tenant')) newRole = "Tenant";
-    else if (currentUrl.includes('operator')) newRole = 'Operator';
-
-    if (newRole !== userSlice.role) {
-      dispatch(updateUserSlice({ _id: null, role: newRole }));
-    }
-    setRole(newRole)
-  }, [currentUrl, userSlice.role, dispatch]);
-
-  const formik = useFormik({
+ 
+ const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
@@ -104,7 +91,7 @@ export function Login(props: any) {
       )}
       <div className='fv-row mb-8'>
         <div className='auth-input-box'>
-          <label className='form-label '>Email Address{role === "Landlord" && <>/Mobile</>}</label>
+          <label className='form-label '>Email Address</label>
           <input
             placeholder='Email address'
             {...formik.getFieldProps('email')}
