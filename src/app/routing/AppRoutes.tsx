@@ -16,8 +16,6 @@ import { RootState } from '../redux/store'
 
 // page import 
 
-const ESignAuthPage = lazy(() => import('../pages/ESignAuthPage'))
-
 
 /**
  * Base URL of the website.
@@ -33,8 +31,7 @@ const AppRoutes: FC = () => {
   return (
     <BrowserRouter basename={'/'}>
       <Routes>
-        <Route element={<App />}>         
-          <Route path='/e-tenancies/signature/auth/:secretKey' element={<ESignAuthPage />} />
+        <Route element={<App />}>                 
           {userSlice?._id ? (
             <>
               <Route path='/*' element={<PrivateRoutes />} />

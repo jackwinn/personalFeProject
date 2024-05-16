@@ -1,20 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { boolean } from 'yup';
-
-// export interface AgentState {
-//   _id: string | null
-//   userName: string
-//   name: string
-//   email: string
-//   image: string
-//   views: string
-//   expiryDate: Date | null
-//   state: string
-//   area: string
-//   loc: any | null
-// }
-
-
 
 const initialState = {
   _id: null,
@@ -38,6 +22,6 @@ export const userSlice = createSlice({
   },
 })
 
-export const { updateUserSlice, logOut } = userSlice.actions
+export const { updateUserSlice } = userSlice.actions
 
 export default userSlice.reducer

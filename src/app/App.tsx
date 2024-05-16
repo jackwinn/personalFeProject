@@ -7,11 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 // import { RootState } from './redux/store'
 import { Slide, ToastContainer } from 'react-toastify';
 
-// import { updateUserSlice, logOut } from './redux/features/userSlice'
-import lib from './biz/lib'
 
-// biz
-import sharedBiz from './biz/sharedBiz'
 
 const App = () => {
   // const userSlice = useSelector((state: RootState) => state.user)

@@ -9,17 +9,17 @@ import { RootState } from '../redux/store'
 import ProtectedRoute from './ProtectedRoutes'
 
 const PrivateRoutes = () => {  
-  const ETenanciesPage = lazy(() => import('../pages/ETenanciesPage'))
+
 
 
   const userSlice = useSelector((state: RootState) => state.user)
-  const userModule = userSlice?.access?.modules
+  // const userModule = userSlice?.access?.modules
 
   return (
     <Routes>
       <Route element={<MasterLayout />}>
       
-        <Route
+        {/* <Route
           path='tenant/e-tenancies'
           element={
             <SuspensedView>
@@ -30,7 +30,9 @@ const PrivateRoutes = () => {
               />
             </SuspensedView>
           }
-        />
+        /> */}
+
+
       </Route>
     </Routes>
   )

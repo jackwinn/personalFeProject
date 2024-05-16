@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Login } from './components/Login'
-import { ForgotPassword } from './components/ForgotPassword'
+// import { ForgotPassword } from './components/ForgotPassword'
 // import { ResetPassword } from './components/ResetPassword'
 import { toAbsoluteUrl } from '../../../_metronic/helpers'
 import clsx from 'clsx'
@@ -27,7 +27,7 @@ const AuthPage = () => {
       setAuthState(data)
     }
 
-    if (authState === STATE_FORGOT) return <ForgotPassword authState={handleChildData} />
+    // if (authState === STATE_FORGOT) return <ForgotPassword authState={handleChildData} />
     return <Login authState={handleChildData} />
   }
 

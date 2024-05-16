@@ -13,9 +13,8 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../../redux/store'
 
 // Biz
-import userBiz from '../../../biz/userBiz'
-import userRoleBiz from '../../../biz/userRoleBiz'
-import lib from '../../../biz/lib'
+import { userBiz } from '../../../biz/userBiz'
+
 // import { toAbsoluteUrl } from '../../../../_metronic/helpers'
 
 const loginSchema = Yup.object().shape({
@@ -40,27 +39,23 @@ export function Login(props: any) {
   const userSlice = useSelector((state: RootState) => state.user)
   const [loading, setLoading] = useState(false)
 
-  const [role, setRole] = useState("")
 
-  const currentUrl = window.location.hostname;
-
- 
- const formik = useFormik({
+  const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
-      if (!values.email || !values.password) setStatus(`Email address${role === "Landlord" ? `/Mobile` : ``} or password is required.`)
+      if (!values.email || !values.password) setStatus(`Email address or password is required`)
       else {
         setLoading(true)
         setSubmitting(false)
         try {
-          const user = await userBiz.login({ ...values, role: role })
-          if (user) dispatch(updateUserSlice(user))
-          lib.log("logged in user:")
-          lib.log(user)
-        } catch (err: any) {
-          lib.log(err.response.data)
-          setStatus(err.response.data.message)
+          const currentUser = await userBiz.login({ ...values, role: "Admin" })
+          // if (currentUser) dispatch(updateUserSlice(currentUser))
+          // lib.log("logged in user:")
+          console.log(currentUser)
+        } catch (err: any) {          
+          console.log(err)
+          // setStatus(err.response.data.message)
         } finally {
           setLoading(false)
           setSubmitting(false)
@@ -82,7 +77,7 @@ export function Login(props: any) {
       id='kt_login_signin_form'
     >
       <div className='separator separator-content my-14'>
-        <span className='auth-title'>{role}</span>
+        <span className='auth-title'>{"Admin"}</span>
       </div>
       {formik.status && (
         <div className='mb-lg-12 alert alert-danger'>
@@ -143,7 +138,7 @@ export function Login(props: any) {
           className='btn auth-sign-in-button'
         // disabled={formik.isSubmitting || !formik.isValid}
         >
-          {!loading && <span className='indicator-label'>Sign In</span>}
+          {!loading && <span className='indicator-label'>Login</span>}
           {loading && (
             <span className='indicator-progress' style={{ display: 'block' }}>
               Please wait...
