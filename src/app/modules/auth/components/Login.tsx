@@ -49,8 +49,13 @@ export function Login(props: any) {
         setLoading(true)
         setSubmitting(false)
         try {
-          const currentUser = await userBiz.login({ ...values, role: "Admin" })
-          // if (currentUser) dispatch(updateUserSlice(currentUser))
+          const loginParams = {
+            email: values.email,
+            password: values.password,
+            role: "Admin"
+          }
+          const currentUser = await userBiz.login(loginParams)
+          if (currentUser) dispatch(updateUserSlice(currentUser))
           // lib.log("logged in user:")
           console.log(currentUser)
         } catch (err: any) {          
