@@ -1,21 +1,22 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-// Packages
+//packages
 import { useEffect, useState, } from 'react'
 import * as Yup from 'yup'
 import clsx from 'clsx'
 // import {Link} from 'react-router-dom'
 import { useFormik } from 'formik'
 
-// Redux
+//redux
 import { updateUserSlice } from '../../../redux/features/userSlice'
 import { RootState } from '../../../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../../redux/store'
 
-// Biz
+//biz
 import { userBiz } from '../../../biz/userBiz'
 
-// import { toAbsoluteUrl } from '../../../../_metronic/helpers'
+//setup data 
+import { setupData } from '../../../data/SetupData'
 
 const loginSchema = Yup.object().shape({
   // email: Yup.string()
@@ -44,10 +45,10 @@ export function Login(props: any) {
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
-      if (!values.email || !values.password) setStatus(`Email address or password is required`)
+      if (!values.email) setStatus(`Email address is required`)
+      else if (!values.password) setStatus(`Password is required`)
       else {
         setLoading(true)
-        setSubmitting(false)
         try {
           const loginParams = {
             email: values.email,
@@ -55,15 +56,14 @@ export function Login(props: any) {
             role: "Admin"
           }
           const currentUser = await userBiz.login(loginParams)
-          if (currentUser) dispatch(updateUserSlice(currentUser))
+          if (currentUser._id) dispatch(updateUserSlice(currentUser))
+          else if (currentUser.message) setStatus(currentUser.message)
           // lib.log("logged in user:")
           console.log(currentUser)
-        } catch (err: any) {          
-          console.log(err)
-          // setStatus(err.response.data.message)
-        } finally {
           setLoading(false)
-          setSubmitting(false)
+        } catch (err: any) {
+          console.log(err)
+          setStatus(setupData.systemErrorMessage)
         }
       }
     }

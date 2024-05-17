@@ -1,8 +1,8 @@
-import {SidebarMenuMain} from './SidebarMenuMain'
-import {SidebarMenuItem} from './SidebarMenuItem'
-import {useDispatch, useSelector} from 'react-redux'
+import { SidebarMenuMain } from './SidebarMenuMain'
+import { SidebarMenuItem } from './SidebarMenuItem'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../../../app/redux/store'
-import SetupData from '../../../../../app/data/SetupData'
+import { setupData } from '../../../../../app/data/SetupData'
 
 const SidebarMenu = () => {
   const agentSlice = useSelector((state: RootState) => state.user)
@@ -11,7 +11,7 @@ const SidebarMenu = () => {
   const dispatch = useDispatch()
 
   const handleLogout = () => {
-    dispatch({type: 'USER_LOGOUT'})
+    dispatch({ type: 'USER_LOGOUT' })
   }
 
   return (
@@ -77,4 +77,4 @@ const SidebarMenu = () => {
   )
 }
 
-export {SidebarMenu}
+export { SidebarMenu }
