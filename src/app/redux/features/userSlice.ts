@@ -5,7 +5,8 @@ const initialState = {
   role: '',
   access:{
     modules: []
-  }
+  },
+  token: ''
 }
 
 export const userSlice = createSlice({

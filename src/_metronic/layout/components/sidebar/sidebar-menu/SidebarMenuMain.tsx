@@ -23,7 +23,7 @@ const SidebarMenuMain: React.FC<Props> = () => {
   // Assuming userSlice.access.modules is of type UserModule[]
 
   const userSlice = useSelector((state: RootState) => state.user)
-  const userModules: UserModule[] = userSlice.access.modules;
+  // const userModules: UserModule[] = userSlice.access.modules;
 
   // const getAccessModule = (title: string) => {
   //   const accessModule = userModules.some((module) => module.name === title && module.read);

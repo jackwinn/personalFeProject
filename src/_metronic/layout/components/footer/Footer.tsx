@@ -11,7 +11,7 @@ const Footer = () => {
     <>
       <div className='footer'>
         <span className=''>
-          Copyright © 2023 - {new Date().getFullYear().toString()}. I Roomz Sdn. Bhd. All rights
+          Copyright © 2023 - {new Date().getFullYear().toString()}. All rights
           reserved.
         </span>
       </div>

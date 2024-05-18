@@ -56,10 +56,10 @@ export function Login(props: any) {
             role: "Admin"
           }
           const currentUser = await userBiz.login(loginParams)
-          if (currentUser._id) dispatch(updateUserSlice(currentUser))
+          console.log(currentUser)
+          if (currentUser.token) dispatch(updateUserSlice(currentUser))
           else if (currentUser.message) setStatus(currentUser.message)
           // lib.log("logged in user:")
-          console.log(currentUser)
           setLoading(false)
         } catch (err: any) {
           console.log(err)
