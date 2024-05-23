@@ -1,7 +1,6 @@
-import {baseAPI} from './BaseAPI'
-import {LoginParams} from '../interfaces/modules/userModule.interface'
+import { baseAPI } from './BaseAPI.js'
 
-const login = async (params: LoginParams) => {
+const login = async (params) => {
   const url = `/user/login`
   const payload = {
     email: params.email,
