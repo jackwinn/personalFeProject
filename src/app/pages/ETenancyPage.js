@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import DatePicker from "react-datepicker";
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 //metronic components
 import { StepperComponent } from "../../_metronic/assets/ts/components";
@@ -16,7 +17,9 @@ import { KTIcon } from "../../_metronic/helpers";
 import { setupData } from '../data/SetupData';
 
 //biz
+import { lib } from '../biz/lib'
 import { etenancyBiz } from '../biz/etenancyBiz'
+
 
 export default function ETenancyPage() {
   const userSlice = useSelector((state) => state.user)
@@ -27,17 +30,41 @@ export default function ETenancyPage() {
   const [page, setPage] = useState(0);
   const [pageSummary, setPageSummary] = useState({})
 
+  //e-tenancy
   const [etenancyList, setEtenancyList] = useState([]);
-  const [formModal, setFormModal] = useState(false)
+  const [etenancyForm, setEtenancyForm] = useState([]);
+  const [eTenancyFormModal, setEtanancyFormModal] = useState(false)
 
   //stepper
   const [stepper, setStepper] = useState(null);
   const [stepperElement, setStepperElement] = useState(null);
 
-
   //loading
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    getEtenancyList()
+  }, [search])
+
+  //get all etenancy records
+  const getEtenancyList = async () => {
+    window.scrollTo(0, 0)
+    setEtenancyList([])
+    setPrevSearch(search)
+
+    let searchParams
+    searchParams = {
+      search: search,
+      paging: { page: 0 }
+    }
+
+    const result = await etenancyBiz.search(searchParams)
+    setEtenancyList(result?.data)
+    setPageSummary(result?.summary)
+    setPage(1)
+  }
+
+  //load more by scrolling
   useEffect(() => {
     if (page > 1) {
       const fetchMore = async () => {
@@ -51,10 +78,10 @@ export default function ETenancyPage() {
         const result = await etenancyBiz.search(searchParams)
 
         if (result && result.data) { }
-        // setEtenancyList((eTenancies) => [
-        //     ...eTenancies,
-        //     ...result.data,
-        // ]);
+        setEtenancyList((eTenancies) => [
+          ...eTenancies,
+          ...result.data,
+        ]);
       };
 
       fetchMore();
@@ -66,8 +93,8 @@ export default function ETenancyPage() {
   }
 
   useEffect(() => {
+    // Create an instance of the stepper when the component mounts
     const loadStepper = () => {
-      // Create an instance of the stepper when the component mounts
       const newStepper = StepperComponent.createInsance(stepperElement);
       setStepper(newStepper);
     };
@@ -95,30 +122,174 @@ export default function ETenancyPage() {
   };
 
   const toggleFormModal = () => {
-    setFormModal(!formModal)
+    setEtanancyFormModal(!eTenancyFormModal)
   }
 
   const createETenancy = () => {
-
+    setEtenancyForm({})
     toggleFormModal()
   }
 
-  return (
-    <>
+  const statusRef = useRef('');
+  const inputRef = useRef('');
 
+  const statusOptions = [
+    { label: 'Status', value: '' },
+    { label: 'New', value: 'New' },
+    { label: 'Processing', value: 'Processing' },
+    { label: 'Completed', value: 'Completed' }
+  ]
+
+  const assignSearchValue = (name, value) => {
+    setSearch(searchs => ({
+      ...searchs,
+      [name]: value
+    }))
+  }
+
+  const handleSearch = async () => {
+    assignSearchValue("status", statusRef ? statusRef.current?.value : null)
+    assignSearchValue("custom", inputRef ? inputRef.current?.value : null)
+  }
+
+  const handleSearchEnter = (e) => {
+    if (e.key.toLowerCase() === 'enter')
+      handleSearch()
+  }
+
+  return (
+    <div className='etenant-page'>
+      <div className='td-filter-group'>
+        <select
+          defaultValue={statusOptions[0]}
+          className='form-select td-filter-select'
+          ref={statusRef}
+        >
+          {statusOptions.map((status, index) => {
+            return (
+              <option key={index} value={status.value}>
+                {status.label}
+              </option>
+            )
+          })}
+        </select>
+        <KTIcon
+          className='fs-2 td-filter-icon input-group-text'
+          iconName='magnifier'
+          iconType='outline'
+        />
+        {/* <input
+            className='form-control td-filter-input'
+            placeholder='Search Property Code / Tenant Name'
+            type='text'
+            ref={inputRef}
+            onKeyDown={handleSearchEnter}
+          /> */}
+        <div className='form-control td-filter-search-group'>
+          <button className='td-filter-search-btn' type='submit'
+          // onClick={handleSearch}
+          >
+            Search
+          </button>
+        </div>
+      </div>
 
       <div className='td-header-btn-group'>
+        <span>{pageSummary.records} records</span>
         <button className='btn btn-primary' onClick={createETenancy}>
           New E-Tenancy
         </button>
       </div>
 
+      <div className='table-overflow'>
+        <InfiniteScroll
+          dataLength={etenancyList.length}
+          hasMore={page < pageSummary?.pages}
+          next={handleLoadMore}
+          loader={
+            <p style={{ textAlign: 'center' }} className='text-muted text-center'>
+              Loading data...
+            </p>
+          }
+          endMessage={
+            <p className='text-muted text-center'>
+              <small> Looks like you've reached the end </small>
+            </p>
+          }
+        // style={{ overflow: "hidden" }}
+        >
+          <table
+            id='kt_datatable_vertical_scroll'
+            className='table table-striped table-row-bordered gy-5 gs-7'
+          >
+            <thead>
+              <tr className='fw-semibold fs-6 text-gray-800'>
+                <th
+                // className="pe-7"
+                >
+                  Property Code
+                </th>
+                <th>Tenant Details</th>
+                <th>Tenancy Period</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {etenancyList.map((obj) => {
+                return (
+                  <tr key={obj._id}>
+                    <td>{(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.propertyUnit?.code : obj?.propertyRoom?.name}</td>
+                    <td>
+                      {(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.mainTenant?.name : obj?.mainTenant?.personal?.name}<br />
+                      {(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.mainTenant?.email : obj?.mainTenant?.personal?.email}<br />
+                      {(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.mainTenant?.mobile : obj?.mainTenant?.personal?.mobile}
+                    </td>
+                    <td>
+                      {lib.formatDateDMY(obj?.tenancy?.startDate)} -{' '}
+                      {lib.formatDateDMY(obj?.tenancy?.endDate)}
+                    </td>
+                    <td>{lib.formatDateDMY(obj?.created)}</td>
+                    <td>
+                      {/* {getSignatureStatus(obj?.status, obj?.contract)}                     */}
+                    </td>
+                    <td>
+                      <DropdownButton variant='primary' id="dropdown-basic-button" title="Action">
+                        {/* <Dropdown.Item onClick={() => handleSelected(obj?._id, obj?.contract)}>Edit E-Tenancy</Dropdown.Item>
+                        {action.sign &&
+                          <Dropdown.Item
+                            onClick={() => handleSignModal(obj?._id, 'Manager')}
+                            disabled={obj?.contract.isHostSigned}
+                          >
+                            Manager Signature
+                          </Dropdown.Item>} */}
+                        {/* {action.sign &&
+                          <Dropdown.Item
+                            onClick={() => handleSignModal(obj?._id, 'Tenant', obj?.mainTenant?.personal.name, obj?.mainTenant?.personal.mobile)}
+                            disabled={obj?.contract.isTenantSigned}
+                          >
+                            Send Signature Link To Tenant
+                          </Dropdown.Item>} */}
+                        {/* <Dropdown.Item onClick={() => handleDownloadPDF(obj?._id, 'Tenancy Agreement')}>Download Tenancy Agreement</Dropdown.Item> */}
+                      </DropdownButton>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </InfiniteScroll>
+      </div>
+
+
+      {/* e-Tenancy form */}
       <Modal
         id='kt_modal_create_app'
         tabIndex={-1}
         aria-hidden='true'
         dialogClassName='modal-dialog modal-dialog-centered mw-624px'
-        show={formModal}
+        show={eTenancyFormModal}
         onHide={toggleFormModal}
         backdrop={true}
         size='xl'
@@ -139,7 +310,7 @@ export default function ETenancyPage() {
                       <span className='stepper-number'>1</span>
                     </div>
                     <div className='stepper-label'>
-                      <h3 className='stepper-title'>Generate Contract</h3>
+                      <h3 className='stepper-title'>Agreement Form</h3>
                     </div>
                   </div>
                 </div>
@@ -150,7 +321,7 @@ export default function ETenancyPage() {
                       <span className='stepper-number'>2</span>
                     </div>
                     <div className='stepper-label'>
-                      <h3 className='stepper-title'>Preview Contract</h3>
+                      <h3 className='stepper-title'>Preview Agreement</h3>
                     </div>
                   </div>
                 </div>
@@ -220,7 +391,7 @@ export default function ETenancyPage() {
                         }
 
                         try {
-                          const result = await etenancyBiz.previewAgreement({                        
+                          const result = await etenancyBiz.previewAgreement({
                             ...updatedValues
                           })
 
@@ -310,7 +481,7 @@ export default function ETenancyPage() {
           </div>
         </Modal.Body >
       </Modal >
-    </>
+    </div>
   )
 }
 

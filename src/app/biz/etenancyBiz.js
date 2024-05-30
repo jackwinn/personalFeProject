@@ -1,14 +1,19 @@
-import { userAPI } from "../api/userAPI";
+import { eTenancyAPI } from "../api/etenancyAPI";
 
 
-const search = async (params) => {
-  console.log(params)
-    return await userAPI.login(params)
-  }
+const search = async (search, paging) => {
+  return await eTenancyAPI.search(search, paging)
+}
+
+// const previewAgreement = async (params) => {
+//   console.log(params)
+//   return await eTenancyAPI.previewAgreement(params)
+// }
 
 export const etenancyBiz = {
-    search: search,
-    // save: save,
-    // update: update,
-    // getById: getById
+  search: search,
+  // previewAgreement: previewAgreement,
+  // save: save,
+  // update: update,
+  // getById: getById
 };
