@@ -2,7 +2,7 @@ import { SidebarMenuMain } from './SidebarMenuMain'
 import { SidebarMenuItem } from './SidebarMenuItem'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../../../app/redux/store'
-import { setupData } from '../../../../../app/data/SetupData'
+import { setupData } from '../../../../../app/data/setupData'
 
 const SidebarMenu = () => {
   const agentSlice = useSelector((state: RootState) => state.user)

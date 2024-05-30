@@ -1,46 +1,69 @@
 //packages
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
-import { Dropdown, DropdownButton, Col, Row, Modal, Form } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
-import * as Yup from 'yup';
-import { Formik } from 'formik';
-import DatePicker from "react-datepicker";
-import InfiniteScroll from 'react-infinite-scroll-component';
+import React, {useState, useEffect, useRef, useCallback} from 'react'
+import {useNavigate} from 'react-router-dom'
+import {toast} from 'react-toastify'
+import {Dropdown, DropdownButton, Col, Row, Modal, Form} from 'react-bootstrap'
+import {useDispatch, useSelector} from 'react-redux'
+import * as Yup from 'yup'
+import {Formik} from 'formik'
+import DatePicker from 'react-datepicker'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
 //metronic components
-import { StepperComponent } from "../../_metronic/assets/ts/components";
-import { KTIcon } from "../../_metronic/helpers";
+import {StepperComponent} from '../../_metronic/assets/ts/components'
+import {KTIcon} from '../../_metronic/helpers'
 
 //setup data
-import { setupData } from '../data/SetupData';
+import {setupData} from '../data/setupData'
 
 //biz
-import { lib } from '../biz/lib'
-import { etenancyBiz } from '../biz/etenancyBiz'
-
+import {lib} from '../biz/lib'
+import {etenancyBiz} from '../biz/etenancyBiz'
 
 export default function ETenancyPage() {
-  const userSlice = useSelector((state) => state.user)
+  // const userSlice = useSelector((state) => state.user)
 
   //search
-  const [search, setSearch] = useState({});
-  const [prevSearch, setPrevSearch] = useState({});
-  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState({})
+  const [prevSearch, setPrevSearch] = useState({})
+  const [page, setPage] = useState(0)
   const [pageSummary, setPageSummary] = useState({})
 
   //e-tenancy
-  const [etenancyList, setEtenancyList] = useState([]);
-  const [etenancyForm, setEtenancyForm] = useState([]);
-  const [eTenancyFormModal, setEtanancyFormModal] = useState(false)
+  const [etenancyList, setEtenancyList] = useState([])
+  const [etenancyFormData, setEtenancyFormData] = useState({})
+  const initialEtenancyFormData = {
+    // propertyName: '1',
+    // propertyAddress: '1',
+    // tenantName: '1',
+    // monthlyRental: '1',
+    // tenantIdentityNo: '1',
+    // tenancyStartDate: '2024-05-01T16:00:00.000Z',
+    // tenancyPeriod: 'Other',
+    // tenancyEndDate: '2024-04-30T16:00:00.000Z',
+    // tenantMobile: '1',
+    // tenantEmail: '1',
+    // tenancyOtherPeriod: '1',
+    // bookingDeposit: '1',
+    // securityDeposit: '1',
+    // utilityDeposit: '1',
+    // parkingCardDeposit: '1',
+    // accessCardDeposit: '1',
+  }
+  const [eTenancyFormModal, setEtanancyFormModal] = useState(true)
+  const modeNew = 'New'
+  const modeEdit = 'Edit'
+  const [eTenancyFormMode, setEtanancyFormMode] = useState('')
 
   //stepper
-  const [stepper, setStepper] = useState(null);
-  const [stepperElement, setStepperElement] = useState(null);
+  const [stepper, setStepper] = useState(null)
+  const [stepperElement, setStepperElement] = useState(null)
 
   //loading
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
+
+  //pdf preview
+  const [agreementPDF, setAgreementPDF] = useState(null)
 
   useEffect(() => {
     getEtenancyList()
@@ -52,13 +75,7 @@ export default function ETenancyPage() {
     setEtenancyList([])
     setPrevSearch(search)
 
-    let searchParams
-    searchParams = {
-      search: search,
-      paging: { page: 0 }
-    }
-
-    const result = await etenancyBiz.search(searchParams)
+    const result = await etenancyBiz.search(search, page)
     setEtenancyList(result?.data)
     setPageSummary(result?.summary)
     setPage(1)
@@ -68,94 +85,138 @@ export default function ETenancyPage() {
   useEffect(() => {
     if (page > 1) {
       const fetchMore = async () => {
-        let searchParams = {
-          search: prevSearch,
-          paging: {
-            page: page
-          }
+        const result = await etenancyBiz.search(prevSearch, page)
+
+        if (result && result.data) {
         }
+        setEtenancyList((eTenancies) => [...eTenancies, ...result.data])
+      }
 
-        const result = await etenancyBiz.search(searchParams)
-
-        if (result && result.data) { }
-        setEtenancyList((eTenancies) => [
-          ...eTenancies,
-          ...result.data,
-        ]);
-      };
-
-      fetchMore();
+      fetchMore()
     }
-  }, [page]);
+  }, [page])
 
   const handleLoadMore = () => {
-    setPage((page) => page + 1);
+    setPage((page) => page + 1)
   }
 
   useEffect(() => {
     // Create an instance of the stepper when the component mounts
     const loadStepper = () => {
-      const newStepper = StepperComponent.createInsance(stepperElement);
-      setStepper(newStepper);
-    };
+      const newStepper = StepperComponent.createInsance(stepperElement)
+      setStepper(newStepper)
+    }
 
-    loadStepper();
+    loadStepper()
 
     // Cleanup: Destroy the stepper instance when the component unmounts
     return () => {
       if (stepper) {
-        stepper.destroy();
+        stepper.destroy()
       }
-    };
-  }, [stepperElement]);
+    }
+  }, [stepperElement])
 
   const prevStep = () => {
     if (stepper) {
-      stepper.goPrev();
+      stepper.goPrev()
     }
-  };
+  }
 
   const nextStep = () => {
     if (stepper) {
-      stepper.goNext();
+      stepper.goNext()
     }
-  };
+  }
 
-  const toggleFormModal = () => {
+  const toggleEtancyFormModal = () => {
     setEtanancyFormModal(!eTenancyFormModal)
   }
 
-  const createETenancy = () => {
-    setEtenancyForm({})
-    toggleFormModal()
+  const createNewETenancy = () => {
+    setEtanancyFormMode(modeNew)
+    setEtenancyFormData({})
+    toggleEtancyFormModal()
   }
 
-  const statusRef = useRef('');
-  const inputRef = useRef('');
+  const populateEtenancyData = async (etenancyId) => {
+    const result = await etenancyBiz.getById(etenancyId)
+    console.log('populate Etenancy data:')
+    console.log(result)
+    let selectedFormData = {
+      _id: result._id,
+      propertyName: result?.property?.name,
+      propertyAddress: result?.property?.address,
+      monthlyRental: result?.property?.montlyRental,
+
+      tenantName: result?.tenant?.name,
+      tenantIdentityNo: result?.tenant?.identity?.number,
+      tenantIdentityType: result?.tenant?.identity?.type,
+      tenantMobile: result?.tenant?.mobile,
+      tenantEmail: result?.tenant?.email,
+
+      bookingDeposit: String(result?.deposit?.booking),
+      securityDeposit: String(result?.deposit?.security),
+      utilityDeposit: String(result?.deposit?.utility),
+      accessCardDeposit: String(result?.deposit?.accessCard),
+      parkingCardDeposit: String(result?.deposit?.parkingCard),
+
+      tenancyPeriod: result.tenancy.period,
+      tenancyStartDate: result.tenancy.startDate,
+      tenancyEndDate: result.tenancy.endDate,
+    }
+    if (result) {
+      setEtenancyFormData(selectedFormData)
+    } else {
+      setEtenancyFormData({})
+    }
+    return selectedFormData
+  }
+
+  const handleSelectedEtenancy = async (etanancyId) => {
+    setEtanancyFormMode(modeEdit)
+    const selectedFormData = await populateEtenancyData(etanancyId)
+    if (selectedFormData) setEtenancyFormData(selectedFormData)
+    toggleEtancyFormModal()
+  }
+
+  // search functions start
+  const statusRef = useRef('')
+  const inputRef = useRef('')
 
   const statusOptions = [
-    { label: 'Status', value: '' },
-    { label: 'New', value: 'New' },
-    { label: 'Processing', value: 'Processing' },
-    { label: 'Completed', value: 'Completed' }
+    {label: 'Status', value: ''},
+    {label: 'New', value: 'New'},
+    {label: 'Processing', value: 'Processing'},
+    {label: 'Completed', value: 'Completed'},
   ]
 
   const assignSearchValue = (name, value) => {
-    setSearch(searchs => ({
+    setSearch((searchs) => ({
       ...searchs,
-      [name]: value
+      [name]: value,
     }))
   }
 
   const handleSearch = async () => {
-    assignSearchValue("status", statusRef ? statusRef.current?.value : null)
-    assignSearchValue("custom", inputRef ? inputRef.current?.value : null)
+    assignSearchValue('status', statusRef ? statusRef.current?.value : null)
+    assignSearchValue('custom', inputRef ? inputRef.current?.value : null)
   }
 
   const handleSearchEnter = (e) => {
-    if (e.key.toLowerCase() === 'enter')
-      handleSearch()
+    if (e.key.toLowerCase() === 'enter') handleSearch()
   }
+  // search functions end
+
+  // form functions start
+  const handleETenancyFormData = (obj) => {
+    setEtenancyFormData((formData) => ({
+      ...formData,
+      ...obj,
+    }))
+  }
+
+  // form functions end
 
   return (
     <div className='etenant-page'>
@@ -178,16 +239,18 @@ export default function ETenancyPage() {
           iconName='magnifier'
           iconType='outline'
         />
-        {/* <input
-            className='form-control td-filter-input'
-            placeholder='Search Property Code / Tenant Name'
-            type='text'
-            ref={inputRef}
-            onKeyDown={handleSearchEnter}
-          /> */}
+        <input
+          className='form-control td-filter-input'
+          placeholder='tenant name, mobile or email'
+          type='text'
+          ref={inputRef}
+          onKeyDown={handleSearchEnter}
+        />
         <div className='form-control td-filter-search-group'>
-          <button className='td-filter-search-btn' type='submit'
-          // onClick={handleSearch}
+          <button
+            className='td-filter-search-btn'
+            type='submit'
+            // onClick={handleSearch}
           >
             Search
           </button>
@@ -196,18 +259,19 @@ export default function ETenancyPage() {
 
       <div className='td-header-btn-group'>
         <span>{pageSummary.records} records</span>
-        <button className='btn btn-primary' onClick={createETenancy}>
+        <button className='btn btn-primary' onClick={createNewETenancy}>
           New E-Tenancy
         </button>
       </div>
 
+      {/* table data start */}
       <div className='table-overflow'>
         <InfiniteScroll
           dataLength={etenancyList.length}
           hasMore={page < pageSummary?.pages}
           next={handleLoadMore}
           loader={
-            <p style={{ textAlign: 'center' }} className='text-muted text-center'>
+            <p style={{textAlign: 'center'}} className='text-muted text-center'>
               Loading data...
             </p>
           }
@@ -216,7 +280,7 @@ export default function ETenancyPage() {
               <small> Looks like you've reached the end </small>
             </p>
           }
-        // style={{ overflow: "hidden" }}
+          // style={{ overflow: "hidden" }}
         >
           <table
             id='kt_datatable_vertical_scroll'
@@ -224,46 +288,38 @@ export default function ETenancyPage() {
           >
             <thead>
               <tr className='fw-semibold fs-6 text-gray-800'>
-                <th
-                // className="pe-7"
-                >
-                  Property Code
-                </th>
-                <th>Tenant Details</th>
+                <th>Property Info</th>
+                <th>Tenant Info</th>
                 <th>Tenancy Period</th>
                 <th>Created</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              {etenancyList.map((obj) => {
+              {etenancyList.map((agreement) => {
                 return (
-                  <tr key={obj._id}>
-                    <td>{(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.propertyUnit?.code : obj?.propertyRoom?.name}</td>
+                  <tr key={agreement._id}>
                     <td>
-                      {(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.mainTenant?.name : obj?.mainTenant?.personal?.name}<br />
-                      {(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.mainTenant?.email : obj?.mainTenant?.personal?.email}<br />
-                      {(obj.contract?.isHostSigned && obj.contract?.isTenantSigned) ? obj?.mainTenant?.mobile : obj?.mainTenant?.personal?.mobile}
+                      Name: {agreement?.property?.name} <br />
+                      Address: {agreement?.property?.address} <br />
                     </td>
                     <td>
-                      {lib.formatDateDMY(obj?.tenancy?.startDate)} -{' '}
-                      {lib.formatDateDMY(obj?.tenancy?.endDate)}
-                    </td>
-                    <td>{lib.formatDateDMY(obj?.created)}</td>
-                    <td>
-                      {/* {getSignatureStatus(obj?.status, obj?.contract)}                     */}
+                      Name: {agreement?.tenant?.name} <br />
+                      Mobile: {agreement?.tenant?.mobile} <br />
+                      Email: {agreement?.tenant?.email}
                     </td>
                     <td>
-                      <DropdownButton variant='primary' id="dropdown-basic-button" title="Action">
-                        {/* <Dropdown.Item onClick={() => handleSelected(obj?._id, obj?.contract)}>Edit E-Tenancy</Dropdown.Item>
-                        {action.sign &&
-                          <Dropdown.Item
-                            onClick={() => handleSignModal(obj?._id, 'Manager')}
-                            disabled={obj?.contract.isHostSigned}
-                          >
-                            Manager Signature
-                          </Dropdown.Item>} */}
+                      Start date: {lib.formatDateDDMMYYYY(agreement?.tenancy?.startDate)} <br />
+                      End date: {lib.formatDateDDMMYYYY(agreement?.tenancy?.endDate)}
+                    </td>
+                    <td>{lib.formatDateDDMMYYYY(agreement?.created)}</td>
+                    <td>{agreement.status}</td>
+                    <td>
+                      <DropdownButton variant='primary' id='dropdown-basic-button' title='Action'>
+                        <Dropdown.Item onClick={() => handleSelectedEtenancy(agreement?._id)}>
+                          Edit
+                        </Dropdown.Item>
                         {/* {action.sign &&
                           <Dropdown.Item
                             onClick={() => handleSignModal(obj?._id, 'Tenant', obj?.mainTenant?.personal.name, obj?.mainTenant?.personal.mobile)}
@@ -281,16 +337,16 @@ export default function ETenancyPage() {
           </table>
         </InfiniteScroll>
       </div>
+      {/* table data end */}
 
-
-      {/* e-Tenancy form */}
+      {/* e-Tenancy form start*/}
       <Modal
         id='kt_modal_create_app'
         tabIndex={-1}
         aria-hidden='true'
         dialogClassName='modal-dialog modal-dialog-centered mw-624px'
         show={eTenancyFormModal}
-        onHide={toggleFormModal}
+        onHide={toggleEtancyFormModal}
         backdrop={true}
         size='xl'
       >
@@ -302,15 +358,18 @@ export default function ETenancyPage() {
               id='kt_modal_create_app_stepper'
             >
               {/* Stepper nagivation */}
-              <div className='stepper-nav ps-lg-10 etenant-stepper-nav'>
-                <div className='stepper-item etenant-stepper-item' data-kt-stepper-element='nav'>
+              <div className='stepper-nav ps-lg-10 etenant-stepper-nav '>
+                <div
+                  className='stepper-item etenant-stepper-item current'
+                  data-kt-stepper-element='nav'
+                >
                   <div className='stepper-wrapper'>
                     <div className='stepper-icon w-40px h-40px'>
                       <i className='stepper-check fas fa-check'></i>
                       <span className='stepper-number'>1</span>
                     </div>
                     <div className='stepper-label'>
-                      <h3 className='stepper-title'>Agreement Form</h3>
+                      <h3 className='stepper-title'>Tenancy Agreement</h3>
                     </div>
                   </div>
                 </div>
@@ -321,7 +380,7 @@ export default function ETenancyPage() {
                       <span className='stepper-number'>2</span>
                     </div>
                     <div className='stepper-label'>
-                      <h3 className='stepper-title'>Preview Agreement</h3>
+                      <h3 className='stepper-title'>Preview e-Tenancy</h3>
                     </div>
                   </div>
                 </div>
@@ -330,15 +389,45 @@ export default function ETenancyPage() {
               {/* Stepper contents */}
               <div className='flex-row-fluid py-lg-5 px-lg-15'>
                 <form id='kt_modal_create_app_form'>
-
                   {/* step 1 begin */}
                   <div className='current' data-kt-stepper-element='content'>
                     <Formik
                       enableReinitialize
-                      initialValues={{}}
+                      initialValues={
+                        eTenancyFormMode === modeNew ? initialEtenancyFormData : etenancyFormData
+                      }
                       // validationSchema={validationSchema1}
-                      onSubmit={async (values, { setSubmitting }) => {
+                      onSubmit={async (values, {setSubmitting}) => {
                         setSubmitting(false)
+                        setLoading(true)
+
+                        const updatedValues = {
+                          ...values,
+                        }
+
+                        setEtenancyFormData(updatedValues)
+
+                        try {
+                          const result = await etenancyBiz.previewAgreement({
+                            ...updatedValues,
+                          })
+
+                          if (result) {
+                            // Convert Uint8Array to Blob
+                            const pdfBlob = new Blob([result], {type: 'application/pdf'})
+                            // Create a Blob URL
+                            const blobUrl = URL.createObjectURL(pdfBlob)
+                            // Set the Blob URL to the state
+                            setAgreementPDF(blobUrl)
+
+                            handleETenancyFormData(updatedValues)
+                          }
+                        } catch (err) {
+                          console.log(err)
+                        } finally {
+                          setLoading(false)
+                        }
+
                         nextStep()
                       }}
                     >
@@ -357,9 +446,435 @@ export default function ETenancyPage() {
                         } = props
 
                         return (
-                          <div>
+                          <div className='w-100'>
+                            <div className='etenancy-property-details'>
+                              <h2>Property Details</h2>
+                              <Row>
+                                <Col>
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='propertyName'
+                                  >
+                                    <Form.Label column md='4'>
+                                      <span className='required'>Name</span> :
+                                    </Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        type='text'
+                                        size='sm'
+                                        placeholder='Property Name'
+                                        defaultValue={values.propertyName}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                      {touched.propertyName && errors.propertyName && (
+                                        <span className='formik-error-msg'>
+                                          {errors.propertyName}
+                                        </span>
+                                      )}
+                                    </Col>
+                                  </Form.Group>
+
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='propertyAddress'
+                                  >
+                                    <Form.Label column md='4'>
+                                      <span className='required'>Address</span> :
+                                    </Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        as='textarea'
+                                        rows='3'
+                                        size='sm'
+                                        placeholder='Property Address'
+                                        defaultValue={values.propertyAddress}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                    </Col>
+                                  </Form.Group>
+                                </Col>
+
+                                <Col>
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='monthlyRental'
+                                  >
+                                    <Form.Label column md='4'>
+                                      <span className='required'>Monthly Rental (RM)</span> :
+                                    </Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        type='text'
+                                        size='sm'
+                                        placeholder='Monthly Rental (RM)'
+                                        defaultValue={values.monthlyRental}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                    </Col>
+                                  </Form.Group>
+                                </Col>
+                              </Row>
+                            </div>
+                            <hr />
                             <div>
-                              CONTENT PAGE 1 HERE
+                              <h2>Tenant Details</h2>
+                              <Row>
+                                <Col>
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='tenantName'
+                                  >
+                                    <Form.Label column md='4'>
+                                      <span className='required'>Name</span> :
+                                    </Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        type='text'
+                                        size='sm'
+                                        placeholder='Tenant Name'
+                                        defaultValue={values.tenantName}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                      {touched.tenantName && errors.tenantName && (
+                                        <span className='formik-error-msg'>
+                                          {errors.tenantName}
+                                        </span>
+                                      )}
+                                    </Col>
+                                  </Form.Group>
+
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='tenantIdentityNo'
+                                  >
+                                    <Form.Label column md='4'>
+                                      <span className='required'>NRIC</span> :
+                                    </Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        type='text'
+                                        size='sm'
+                                        placeholder='NRIC'
+                                        defaultValue={values.tenantIdentityNo}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                    </Col>
+                                  </Form.Group>
+                                </Col>
+
+                                <Col>
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='tenantEmail'
+                                  >
+                                    <Form.Label column md='4'>
+                                      <span className='required'>Email Address</span> :
+                                    </Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        type='text'
+                                        size='sm'
+                                        placeholder='Email Address'
+                                        defaultValue={values.tenantEmail}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                    </Col>
+                                  </Form.Group>
+
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='tenantMobile'
+                                  >
+                                    <Form.Label column md='4'>
+                                      <span className='required'>Contact No.</span> :
+                                    </Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        type='text'
+                                        size='sm'
+                                        placeholder='Contact No'
+                                        defaultValue={values.tenantMobile}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                      />
+                                    </Col>
+                                  </Form.Group>
+                                </Col>
+                              </Row>
+                            </div>
+                            <hr />
+
+                            <Row>
+                              <h2>Tenancy Details</h2>
+                              <Col>
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='tenancyStartDate'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Tenancy Start Date</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <DatePicker
+                                      className='form-control form-control-sm'
+                                      wrapperClassName='custom-date-picker-wrapper'
+                                      dateFormat='dd/MM/yyyy'
+                                      name='tenancyStartDate'
+                                      placeholderText='dd/mm/yyyy'
+                                      selected={
+                                        values?.tenancyStartDate
+                                          ? new Date(values?.tenancyStartDate)
+                                          : ''
+                                      }
+                                      onChange={(date) => {
+                                        setFieldValue('tenancyStartDate', date)
+                                      }}
+                                      onBlur={handleBlur}
+                                    />
+                                    {touched.tenancyStartDate && errors.tenancyStartDate && (
+                                      <span className='formik-error-msg'>
+                                        {errors.tenancyStartDate}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='tenancyPeriod'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Tenancy Period</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <Form.Select
+                                      size='sm'
+                                      placeholder='Tenancy period'
+                                      defaultValue={values.tenancyPeriod}
+                                      name='tenancyPeriod'
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                    >
+                                      {setupData.tenancyPeriod.map((obj) => {
+                                        return <option value={obj.value}>{obj.label}</option>
+                                      })}
+                                    </Form.Select>
+                                    {touched.tenancyPeriod && errors.tenancyPeriod && (
+                                      <span className='formik-error-msg'>
+                                        {errors.tenancyPeriod}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+
+                                {values.tenancyPeriod === 'Other' && (
+                                  <Form.Group
+                                    as={Row}
+                                    className='mb-3 align-items-center'
+                                    controlId='tenancyOtherPeriod'
+                                  >
+                                    <Form.Label column md='4'></Form.Label>
+                                    <Col column md='8'>
+                                      <Form.Control
+                                        type='text'
+                                        size='sm'
+                                        placeholder='Other Tenancy Period'
+                                        defaultValue={values.tenancyOtherPeriod}
+                                        onChange={handleChange}
+                                      />
+                                    </Col>
+                                  </Form.Group>
+                                )}
+                              </Col>
+                              <Col>
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='tenancyEndDate'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Tenancy End Date</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <DatePicker
+                                      className='form-control form-control-sm'
+                                      wrapperClassName='custom-date-picker-wrapper'
+                                      dateFormat='dd/MM/yyyy'
+                                      name='tenancyEndDate'
+                                      placeholderText='dd/mm/yyyy'
+                                      selected={
+                                        values?.tenancyEndDate
+                                          ? new Date(values?.tenancyEndDate)
+                                          : ''
+                                      }
+                                      onChange={(date) => setFieldValue('tenancyEndDate', date)}
+                                      onBlur={handleBlur}
+                                    />
+                                    {touched.tenancyEndDate && errors.tenancyEndDate && (
+                                      <span className='formik-error-msg'>
+                                        {errors.tenancyEndDate}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+                              </Col>
+                            </Row>
+                            <hr />
+
+                            <Row>
+                              <h2>Rental and Deposit Details</h2>
+                              <Col>
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='bookingDeposit'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Booking Deposit (RM)</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <Form.Control
+                                      type='text'
+                                      size='sm'
+                                      placeholder='Booking Deposit (RM)'
+                                      value={values.bookingDeposit}
+                                      name='bookingDeposit'
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                    />
+                                    {touched.bookingDeposit && errors.bookingDeposit && (
+                                      <span className='formik-error-msg'>
+                                        {errors.bookingDeposit}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='securityDeposit'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Security Deposit (RM)</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <Form.Control
+                                      type='text'
+                                      size='sm'
+                                      placeholder='Security Deposit (RM)'
+                                      value={values.securityDeposit}
+                                      name='securityDeposit'
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                    />
+                                    {touched.securityDeposit && errors.securityDeposit && (
+                                      <span className='formik-error-msg'>
+                                        {errors.securityDeposit}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='utilityDeposit'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Utility Deposit (RM)</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <Form.Control
+                                      type='text'
+                                      size='sm'
+                                      placeholder='Utility Deposit'
+                                      value={values.utilityDeposit}
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                    />
+                                    {touched.utilityDeposit && errors.utilityDeposit && (
+                                      <span className='formik-error-msg'>
+                                        {errors.utilityDeposit}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+                              </Col>
+
+                              <Col>
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='accessCardDeposit'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Access Card Deposit (RM)</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <Form.Control
+                                      type='text'
+                                      size='sm'
+                                      placeholder='Access Card Deposit'
+                                      value={values.accessCardDeposit}
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                    />
+                                    {touched.accessCardDeposit && errors.accessCardDeposit && (
+                                      <span className='formik-error-msg'>
+                                        {errors.accessCardDeposit}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+
+                                <Form.Group
+                                  as={Row}
+                                  className='mb-3 align-items-center'
+                                  controlId='parkingCardDeposit'
+                                >
+                                  <Form.Label column md='4'>
+                                    <span className='required'>Parking Card Deposit (RM)</span> :
+                                  </Form.Label>
+                                  <Col column md='8'>
+                                    <Form.Control
+                                      type='text'
+                                      size='sm'
+                                      placeholder='Parking Card Deposit'
+                                      value={values.parkingCardDeposit}
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                    />
+                                    {touched.parkingCardDeposit && errors.parkingCardDeposit && (
+                                      <span className='formik-error-msg'>
+                                        {errors.parkingCardDeposit}
+                                      </span>
+                                    )}
+                                  </Col>
+                                </Form.Group>
+
+                                <br />
+                                <div>
+                                  <h4 className='text-'>Total to be paid: RM</h4>
+                                </div>
+                              </Col>
+                            </Row>
+                            <div>
                               <button
                                 type='button'
                                 className='btn btn-lg btn-primary'
@@ -370,7 +885,6 @@ export default function ETenancyPage() {
                               </button>
                             </div>
                           </div>
-
                         )
                       }}
                     </Formik>
@@ -383,37 +897,23 @@ export default function ETenancyPage() {
                       enableReinitialize
                       initialValues={{}}
                       // validationSchema={validationSchema1}
-                      onSubmit={async (values, { setSubmitting }) => {
-                        setLoading(true)
-
-                        const updatedValues = {
-                          ...values,
-                        }
-
-                        try {
-                          const result = await etenancyBiz.previewAgreement({
-                            ...updatedValues
-                          })
-
-                          if (result) {
-                            // Convert Uint8Array to Blob
-                            const pdfBlob = new Blob([result], { type: 'application/pdf' })
-                            // Create a Blob URL
-                            const blobUrl = URL.createObjectURL(pdfBlob)
-                            // Set the Blob URL to the state
-                            // setAgreementPDF(blobUrl)
-
-                            // handleSetFormData(updatedValues)
-                          }
-                        } catch (err) {
-                          // lib.log(err)
-                        } finally {
-                          setLoading(false)
-                        }
-
-
-
-
+                      onSubmit={async (values, {setSubmitting}) => {
+                        let result
+                        // console.log(formMode)
+                        // console.log(formData)
+                        // if (formMode === modeEdit) {
+                        //   // lib.log('I AM EDITING')
+                        //   result = await etenancyBiz.update(formData)
+                        //   toast.success(
+                        //     `E-tenancy (${formData.propertyCode}) info updated successfully`
+                        //   )
+                        // } else {
+                        // lib.log('I AM SAVING')
+                        result = await etenancyBiz.create(etenancyFormData)
+                        toast.success('New e-tenancy saved successfully')
+                        // }
+                        getEtenancyList()
+                        // toggleEtancyFormModal()
                       }}
                     >
                       {(props) => {
@@ -431,45 +931,50 @@ export default function ETenancyPage() {
                         } = props
 
                         const handlePreviousStep = () => {
-                          // setAgreementPDF('')
+                          setAgreementPDF(null)
                           prevStep()
                         }
 
-                        const handleNextStep = () => {
-                          handleSubmit()
-                          nextStep()
-                        }
-
                         return (
-                          <div>
-                            <div>
-                              CONTENT PAGE 2 HERE
+                          <div className='e-tenancy-pdf-preview-wrapper'>
+                            {loading && (
+                              <span className='indicator-progress' style={{display: 'block'}}>
+                                Please wait...
+                                <span className='spinner-border spinner-border-sm align-middle ms-2'></span>
+                              </span>
+                            )}
+                            {!loading && (
+                              <iframe
+                                title='PDF Viewer'
+                                src={agreementPDF}
+                                width='100%'
+                                height='800px'
+                              ></iframe>
+                            )}
 
-                              <div className='d-flex pt-10'>
-                                <div className='me-2'>
-                                  <button
-                                    type='button'
-                                    className='btn btn-lg btn-light-primary me-3'
-                                    data-kt-stepper-action='previous'
-                                    onClick={handlePreviousStep}
-                                  >
-                                    Previous
-                                  </button>
-                                </div>
-                                <div>
-                                  <button
-                                    type='button'
-                                    className='btn btn-lg btn-primary'
-                                    data-kt-stepper-action='submit'
-                                    onClick={handleSubmit}
-                                  >
-                                    Submit
-                                  </button>
-                                </div>
+                            <div className='d-flex pt-10'>
+                              <div className='me-2'>
+                                <button
+                                  type='button'
+                                  className='btn btn-lg btn-light-primary me-3'
+                                  data-kt-stepper-action='previous'
+                                  onClick={handlePreviousStep}
+                                >
+                                  Previous
+                                </button>
+                              </div>
+                              <div>
+                                <button
+                                  type='button'
+                                  className='btn btn-lg btn-primary'
+                                  data-kt-stepper-action='submit'
+                                  onClick={handleSubmit}
+                                >
+                                  Submit
+                                </button>
                               </div>
                             </div>
                           </div>
-
                         )
                       }}
                     </Formik>
@@ -479,45 +984,9 @@ export default function ETenancyPage() {
               </div>
             </div>
           </div>
-        </Modal.Body >
-      </Modal >
+        </Modal.Body>
+      </Modal>
+      {/* e-Tenancy form end*/}
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

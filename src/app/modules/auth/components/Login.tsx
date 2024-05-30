@@ -16,7 +16,7 @@ import { AppDispatch } from '../../../redux/store'
 import { userBiz } from '../../../biz/userBiz'
 
 //setup data 
-import { setupData } from '../../../data/SetupData'
+import { setupData } from '../../../data/setupData'
 
 const loginSchema = Yup.object().shape({
   // email: Yup.string()
