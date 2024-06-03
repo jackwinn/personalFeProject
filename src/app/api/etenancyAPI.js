@@ -1,11 +1,11 @@
-import { baseAPI } from './BaseAPI.js'
+import {baseAPI} from './BaseAPI.js'
 
 const search = async (search, page) => {
   const url = `/eTenancy/search`
   const payload = {
     search: search,
     paging: {
-      page: page
+      page: page,
     },
   }
   try {
@@ -18,11 +18,11 @@ const search = async (search, page) => {
 
 const previewAgreement = async (params) => {
   const url = `/eTenancy/previewAgreement`
-  // const payload = {
- 
-  // }
+  const payload = {
+    ...params,
+  }
   try {
-    const result = await baseAPI.post(url, params, { responseType: 'arraybuffer' })
+    const result = await baseAPI.post(url, payload, {responseType: 'arraybuffer'})
     return result.data
   } catch (err) {
     throw err
@@ -31,8 +31,9 @@ const previewAgreement = async (params) => {
 
 const create = async (params) => {
   const url = `/eTenancy/create`
+  console.log(url)
   const payload = {
-   ...params
+    ...params,
   }
   try {
     const result = await baseAPI.post(url, payload)
@@ -42,10 +43,11 @@ const create = async (params) => {
   }
 }
 
-const update = async (params) => {
-  const url = `/eTenancy/update`
+const edit = async (params) => {
+  const url = `/eTenancy/edit`
+  console.log(url)
   const payload = {
-    ...params
+    ...params,
   }
   try {
     const result = await baseAPI.post(url, payload)
@@ -56,10 +58,26 @@ const update = async (params) => {
 }
 
 const getById = async (eTenancyId) => {
-  const url = `/eTenancy/getById `
+  const url = `/eTenancy/getById`
   const payload = {
-    _id: eTenancyId
+    _id: eTenancyId,
   }
+  try {
+    const result = await baseAPI.post(url, payload)
+    return result.data
+  } catch (err) {
+    throw err
+  }
+}
+
+const signAgreement = async (eTenancyId, hostName, hostSignature) => {
+  const url = `/eTenancy/signAgreement`
+  const payload = {
+    _id: eTenancyId,
+    hostName: hostName,
+    hostSignature: hostSignature,
+  }
+  console.log(payload)
   try {
     const result = await baseAPI.post(url, payload)
     return result.data
@@ -70,8 +88,9 @@ const getById = async (eTenancyId) => {
 
 export const eTenancyAPI = {
   search: search,
-  previewAgreement: previewAgreement, 
+  previewAgreement: previewAgreement,
   create: create,
-  update: update,
-  getById: getById
+  edit: edit,
+  getById: getById,
+  signAgreement: signAgreement,
 }

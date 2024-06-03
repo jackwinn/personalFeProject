@@ -15,7 +15,7 @@ export const setupData = {
   tenancyPeriod: [
     {label: 'Select...', value: ''},
     {label: '1 Year', value: '1 Year'},
-    {label: '2 Years', value: '2 Year'},
+    {label: '2 Years', value: '2 Years'},
     {label: 'Other', value: 'Other'},
   ],
 }
