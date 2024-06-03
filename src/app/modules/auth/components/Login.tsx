@@ -31,8 +31,8 @@ const loginSchema = Yup.object().shape({
 })
 
 const initialValues = {
-  email: '',
-  password: '',
+  email: 'admin@outlook.com',
+  password: '12',
 }
 
 export function Login(props: any) {
@@ -129,12 +129,12 @@ export function Login(props: any) {
         )}
       </div>
 
-      <div className='d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8'>
+      {/* <div className='d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8'>
         <span></span>
         <button onClick={handleAuthState} className='auth-forgot-button' type='button'>
           forgot password
         </button>
-      </div>
+      </div> */}
 
       <div className='d-grid mb-10'>
         <button

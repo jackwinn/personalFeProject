@@ -174,8 +174,8 @@ export default function ETenancyPage() {
       identityNo: result.host.identityNo,
       hostSignatureImage: result.host.signatureImage,
       hostSignDate: result.host.signDate,
-      
-      dateOfAgreement: result.dateOfAgreement
+
+      dateOfAgreement: result.dateOfAgreement,
     }
     if (result) {
       setEtenancyFormData(selectedFormData)
@@ -343,6 +343,7 @@ export default function ETenancyPage() {
                   <tr key={agreement._id}>
                     <td>
                       Address: {agreement?.property?.address} <br />
+                      Month Rental : RM{agreement?.property?.monthlyRental}
                     </td>
                     <td>
                       Name: {agreement?.tenant?.name} <br />

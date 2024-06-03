@@ -20,7 +20,7 @@ const PrivateRoutes = () => {
     <Routes>
       <Route element={<MasterLayout />}>
         {/* default redirect or fallback if route doesnot match */}
-        <Route path='*' element={<Navigate to={'/dashboard'} />} />
+        <Route path='*' element={<Navigate to={'/e-tenancy'} />} />
 
         <Route
           path='/dashboard'
@@ -37,33 +37,7 @@ const PrivateRoutes = () => {
               <ETenancyPage />
             </SuspensedView>
           }
-        />
-
-        {/* <Route
-          path='tenant/e-tenancies'
-          element={
-            <SuspensedView>
-              <ProtectedRoute
-                component={ETenanciesPage}
-                moduleName="E-Tenancies"
-                userModules={userModule}
-              />
-            </SuspensedView>
-          }
-        /> */}
-
-        {/* <Route
-          path='tenant/e-tenancies'
-          element={
-            <SuspensedView>
-              <ProtectedRoute
-                component={ETenanciesPage}
-                moduleName="E-Tenancies"
-                userModules={userModule}
-              />
-            </SuspensedView>
-          }
-        /> */}
+        />      
       </Route>
     </Routes>
   )
