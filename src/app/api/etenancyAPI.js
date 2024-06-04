@@ -31,10 +31,11 @@ const previewAgreement = async (params) => {
 
 const create = async (params) => {
   const url = `/eTenancy/create`
-  console.log(url)
   const payload = {
     ...params,
   }
+  // console.log(url)
+  // console.log(payload)
   try {
     const result = await baseAPI.post(url, payload)
     return result.data
@@ -45,10 +46,11 @@ const create = async (params) => {
 
 const edit = async (params) => {
   const url = `/eTenancy/edit`
-  console.log(url)
   const payload = {
     ...params,
   }
+  // console.log(url)
+  // console.log(payload)
   try {
     const result = await baseAPI.post(url, payload)
     return result.data
@@ -70,14 +72,13 @@ const getById = async (eTenancyId) => {
   }
 }
 
-const signAgreement = async (eTenancyId, hostName, hostSignature) => {
+const signAgreement = async (eTenancyId, signatureImage) => {
   const url = `/eTenancy/signAgreement`
   const payload = {
     _id: eTenancyId,
-    hostName: hostName,
-    hostSignature: hostSignature,
+    signatureImage: signatureImage,
   }
-  console.log(payload)
+  // console.log(payload)
   try {
     const result = await baseAPI.post(url, payload)
     return result.data

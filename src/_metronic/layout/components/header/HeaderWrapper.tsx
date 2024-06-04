@@ -47,7 +47,7 @@ export function HeaderWrapper() {
                 <Link to='/dashboard' className='d-lg-none'>
                   <img
                     alt='Logo'
-                    src={toAbsoluteUrl('/media/sidebar/iroomz_logo_mini.svg')}
+                    src={toAbsoluteUrl('/media/sidebar/portal_logo_mini.svg')}
                     className='h-30px'
                   />
                 </Link>

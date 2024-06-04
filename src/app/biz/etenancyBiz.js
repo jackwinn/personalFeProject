@@ -5,18 +5,14 @@ const search = async (search, page) => {
 }
 
 const previewAgreement = async (params) => {
-  console.log(params)
   return await eTenancyAPI.previewAgreement(params)
 }
 
 const create = async (params) => {
-  console.log('create biz')
-  console.log(params)
   return await eTenancyAPI.create(params)
 }
 
 const edit = async (params) => {
-  console.log('edit biz')
   return await eTenancyAPI.edit(params)
 }
 
@@ -24,8 +20,8 @@ const getById = async (etenancyId) => {
   return await eTenancyAPI.getById(etenancyId)
 }
 
-const signAgreement = async (etenancyId, hostName, signatureImage) => {
-  return await eTenancyAPI.signAgreement(etenancyId, hostName, signatureImage)
+const signAgreement = async (etenancyId, signatureImage) => {
+  return await eTenancyAPI.signAgreement(etenancyId, signatureImage)
 }
 
 export const etenancyBiz = {

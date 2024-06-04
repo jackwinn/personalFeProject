@@ -1,16 +1,16 @@
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import clsx from 'clsx'
-import {KTIcon, toAbsoluteUrl} from '../../../helpers'
-import {useLayout} from '../../core'
-import {MutableRefObject, useEffect, useRef} from 'react'
-import {ToggleComponent} from '../../../assets/ts/components'
+import { KTIcon, toAbsoluteUrl } from '../../../helpers'
+import { useLayout } from '../../core'
+import { MutableRefObject, useEffect, useRef } from 'react'
+import { ToggleComponent } from '../../../assets/ts/components'
 
 type PropsType = {
   sidebarRef: MutableRefObject<HTMLDivElement | null>
 }
 
 const SidebarLogo = (props: PropsType) => {
-  const {config} = useLayout()
+  const { config } = useLayout()
   const toggleRef = useRef<HTMLDivElement>(null)
 
   const appSidebarDefaultMinimizeDesktopEnabled =
@@ -20,8 +20,8 @@ const SidebarLogo = (props: PropsType) => {
   const toggleType = appSidebarDefaultCollapseDesktopEnabled
     ? 'collapse'
     : appSidebarDefaultMinimizeDesktopEnabled
-    ? 'minimize'
-    : ''
+      ? 'minimize'
+      : ''
   const toggleState = appSidebarDefaultMinimizeDesktopEnabled ? 'active' : ''
   const appSidebarDefaultMinimizeDefault = config.app?.sidebar?.default?.minimize?.desktop?.default
 
@@ -48,31 +48,31 @@ const SidebarLogo = (props: PropsType) => {
   }, [toggleRef, props.sidebarRef])
 
   return (
-    <div className='app-sidebar-logo px-6' id='kt_app_sidebar_logo'>      
-      <Link to='/dashboard'>
+    <div className='app-sidebar-logo px-6' id='kt_app_sidebar_logo'>
+      <Link to='/e-tenancy'>
         {config.layoutType === 'dark-sidebar' ? (
           <img
-            alt='iRoomz Logo'
-            src={toAbsoluteUrl('/media/auth/iroomz_logo.svg')}
+            alt='Portal Logo'
+            src={toAbsoluteUrl('/media/auth/portal_logo.svg')}
             className='app-sidebar-logo-default'
           />
         ) : (
           <>
             <img
-              alt='iRoomz Logo'
-              src={toAbsoluteUrl('/media/auth/iroomz_logo.svg')}
+              alt='Portal Logo'
+              src={toAbsoluteUrl('/media/auth/portal_logo.svg')}
               className='app-sidebar-logo-default theme-light-show'
             />
             <img
-              alt='iRoomz Logo'
-              src={toAbsoluteUrl('/media/auth/iroomz_logo.svg')}
+              alt='Portal Logo'
+              src={toAbsoluteUrl('/media/auth/portal_logo.svg')}
               className='app-sidebar-logo-default theme-dark-show'
             />
           </>
         )}
         <img
-          alt='iRoomz Emblem'
-          src={toAbsoluteUrl('/media/sidebar/iroomz_logo_mini.svg')}
+          alt='Portal Emblem'
+          src={toAbsoluteUrl('/media/sidebar/portal_logo_mini.svg')}
           className='app-sidebar-logo-minimize'
         />
       </Link>
@@ -82,7 +82,7 @@ const SidebarLogo = (props: PropsType) => {
           id='kt_app_sidebar_toggle'
           className={clsx(
             'app-sidebar-toggle btn btn-icon btn-shadow btn-sm body-bg h-30px w-30px position-absolute top-50 start-100 translate-middle rotate',
-            {active: appSidebarDefaultMinimizeDefault}
+            { active: appSidebarDefaultMinimizeDefault }
           )}
           data-kt-toggle='true'
           data-kt-toggle-state={toggleState}
@@ -96,4 +96,4 @@ const SidebarLogo = (props: PropsType) => {
   )
 }
 
-export {SidebarLogo}
+export { SidebarLogo }

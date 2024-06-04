@@ -37,7 +37,7 @@ const initialValues = {
 
 export function Login(props: any) {
   const dispatch = useDispatch<AppDispatch>()
-  const userSlice = useSelector((state: RootState) => state.user)
+  // const userSlice = useSelector((state: RootState) => state.user)
   const [loading, setLoading] = useState(false)
 
 
@@ -63,7 +63,7 @@ export function Login(props: any) {
           setLoading(false)
         } catch (err: any) {
           console.log(err)
-          setStatus(setupData.systemErrorMessage)
+          setStatus(setupData.systemErrorMsg)
         }
       }
     }

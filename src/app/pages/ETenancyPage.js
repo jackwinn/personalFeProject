@@ -1,25 +1,26 @@
 //packages
-import React, {useState, useEffect, useRef, useCallback} from 'react'
-import {useNavigate} from 'react-router-dom'
-import {toast} from 'react-toastify'
-import {Dropdown, DropdownButton, Col, Row, Modal, Form} from 'react-bootstrap'
-import {useDispatch, useSelector} from 'react-redux'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { Dropdown, DropdownButton, Col, Row, Modal, Form } from 'react-bootstrap'
+import { useDispatch, useSelector } from 'react-redux'
 import * as Yup from 'yup'
-import {Formik} from 'formik'
+import { Formik } from 'formik'
 import DatePicker from 'react-datepicker'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import SignatureCanvas from 'react-signature-canvas'
 
 //metronic components
-import {StepperComponent} from '../../_metronic/assets/ts/components'
-import {KTIcon} from '../../_metronic/helpers'
+import { StepperComponent } from '../../_metronic/assets/ts/components'
+import { KTIcon } from '../../_metronic/helpers'
 
 //setup data
-import {setupData} from '../data/setupData'
+import { setupData } from '../data/setupData'
 
 //biz
-import {lib} from '../biz/lib'
-import {etenancyBiz} from '../biz/etenancyBiz'
+import { lib } from '../biz/lib'
+import { regex } from '../biz/regex'
+import { etenancyBiz } from '../biz/etenancyBiz'
 
 export default function ETenancyPage() {
   const userSlice = useSelector((state) => state.user)
@@ -37,29 +38,98 @@ export default function ETenancyPage() {
   //e-tenancy
   const [etenancyList, setEtenancyList] = useState([])
   const [etenancyFormData, setEtenancyFormData] = useState({})
-  const initialEtenancyFormData = {
+  const newEtenancyFormData = {
     propertyAddress: '',
     monthlyRental: '',
-    tenantName1: '',
-    tenantIdentityNo1: '',
+    tenantName: '',
+    tenantIdentityNo: '',
+    tenantEmail: '',
+    tenantMobile: '',
     tenancyPeriod: '',
     tenancyStartDate: '',
     tenancyEndDate: '',
-    tenantMobile1: '',
-    tenantEmail1: '',
     securityDeposit: '',
     utilityDeposit: '',
     parkingCardDeposit: '',
     accessCardDeposit: '',
+    hostName: '',
+    hostIdentityNo: '',
   }
   const [eTenancyFormModal, setEtanancyFormModal] = useState(false)
   const modeNew = 'New'
   const modeEdit = 'Edit'
   const [eTenancyFormMode, setEtanancyFormMode] = useState('')
+  const validationSchema = Yup.object().shape({
+    propertyAddress: Yup.string()
+      .required(setupData.requiredFieldMsg),
+    monthlyRental: Yup.string()
+      .required(setupData.requiredFieldMsg)
+      .test('', 'Only numbers are allowed', regex.isNumeric),
+    tenantName: Yup.string()
+      .required(setupData.requiredFieldMsg)
+      .test("", "Only alphabetic characters, /, @, and . are allowed", (value) => {
+        if (value) {
+          return regex.isName(value)
+        }
+        return true
+      }),
+    tenantIdentityNo: Yup.string()
+      .required(setupData.requiredFieldMsg)
+      .test("", "Please enter in format 01xxxx-xx-xxxx", (value) => {
+        if (value) {
+          return regex.isMalaysianIC(value)
+        }
+        return true
+      }),
+    tenantEmail: Yup.string()
+      .required(setupData.requiredFieldMsg)
+      .test("", "Please enter in format name@example.com", (value) => {
+        if (value) {
+          return regex.isValidEmail(value)
+        }
+        return true
+      }),
+    tenantMobile: Yup.string()
+      .required(setupData.requiredFieldMsg)
+      .test("", "Please enter in format 01x-xxxxxxx", (value) => {
+        if (value) {
+          return regex.isValidPhone(value)
+        }
+        return true
+      }),
+    tenancyPeriod: Yup.string().required(setupData.requiredFieldMsg),
+    tenancyStartDate: Yup.string().required(setupData.requiredFieldMsg),
+    tenancyEndDate: Yup.string().required(setupData.requiredFieldMsg),
+    securityDeposit: Yup.string()
+      .required(setupData.requiredFieldMsg)
+      .test('', 'Only numbers are allowed', regex.isNumeric),
+    utilityDeposit: Yup.string()
+      .required(setupData.requiredFieldMsg)
+      .test('', 'Only numbers are allowed', (value) => {
+        if (value) {
+          return regex.isNumeric(value)
+        }
+        return true
+      }),
+    accessCardDeposit: Yup.string()
+      .test('', 'Only numbers are allowed', (value) => {
+        if (value) {
+          return regex.isNumeric(value)
+        }
+        return true
+      }),
+    parkingCardDeposit: Yup.string()
+      .test('', 'Only numbers are allowed', (value) => {
+        if (value) {
+          return regex.isNumeric(value)
+        }
+        return true
+      }),
+  })
 
   //sign
-  const [signatureModal, setSignatureModal] = useState(false)
-  const [signatureImage, setSignatureImage] = useState('')
+  const [signModal, setSignModal] = useState(false)
+  const [signRef, setSignatureImage] = useState('')
   const [etenancyId, setEtenancyId] = useState(null)
 
   //stepper
@@ -140,7 +210,7 @@ export default function ETenancyPage() {
     setEtanancyFormModal(!eTenancyFormModal)
   }
 
-  const createNewETenancy = () => {
+  const createNewEtenancy = () => {
     setEtanancyFormMode(modeNew)
     setEtenancyFormData({})
     toggleEtancyFormModal()
@@ -155,11 +225,10 @@ export default function ETenancyPage() {
       propertyAddress: result?.property?.address,
       monthlyRental: String(result?.property?.monthlyRental),
 
-      tenantName1: result?.tenant?.name,
-      tenantIdentityNo1: result?.tenant?.identity?.number,
-      tenantIdentityType1: result?.tenant?.identity?.type,
-      tenantMobile1: result?.tenant?.mobile,
-      tenantEmail1: result?.tenant?.email,
+      tenantName: result?.tenant?.name,
+      tenantIdentityNo: result?.tenant?.identityNo,
+      tenantMobile: result?.tenant?.mobile,
+      tenantEmail: result?.tenant?.email,
 
       securityDeposit: String(result?.deposit?.security),
       utilityDeposit: String(result?.deposit?.utility),
@@ -171,9 +240,9 @@ export default function ETenancyPage() {
       tenancyEndDate: result.tenancy.endDate,
 
       hostName: result.host.name,
-      identityNo: result.host.identityNo,
-      hostSignatureImage: result.host.signatureImage,
-      hostSignDate: result.host.signDate,
+      hostIdentityNo: result.host.identityNo,
+      hostSignatureImage: result.host?.signatureImage,
+      hostSignDate: result.host?.signDate,
 
       dateOfAgreement: result.dateOfAgreement,
     }
@@ -198,35 +267,35 @@ export default function ETenancyPage() {
     // console.log(type)
     const result = await etenancyBiz.previewAgreement(selectedformData)
 
-    const fileBlob = new Blob([result], {type: 'application/pdf'})
+    const fileBlob = new Blob([result], { type: 'application/pdf' })
     const fileURL = window.URL.createObjectURL(fileBlob)
 
     window.open(fileURL)
   }
 
-  const toggleSignatureModal = () => {
-    setSignatureModal(!signatureModal)
+  const toggleSignModal = () => {
+    setSignModal(!signModal)
   }
 
-  const handleSignatureModal = (etenancyId) => {
+  const handleSignModal = (etenancyId) => {
     setEtenancyId(etenancyId)
-    toggleSignatureModal()
+    toggleSignModal()
   }
 
   const handleSignAgreement = async () => {
-    if (!signatureImage.isEmpty()) {
-      const signature = signatureImage.getTrimmedCanvas().toDataURL('image/png')
+    if (!signRef.isEmpty()) {
+      const signatureImg = signRef.getTrimmedCanvas().toDataURL('image/png')
 
       if (etenancyId) {
         const result = await etenancyBiz.signAgreement(
           etenancyId,
           userSlice.personal.name,
-          signature
+          signatureImg
         )
         if (result) {
           toast.success(`Manager signature updated successfully`)
           getEtenancyList()
-          toggleSignatureModal()
+          toggleSignModal()
         }
       }
     } else {
@@ -235,13 +304,6 @@ export default function ETenancyPage() {
   }
 
   // search functions start
-  const statusOptions = [
-    {label: 'Status', value: ''},
-    {label: 'New', value: 'New'},
-    {label: 'Processing', value: 'Processing'},
-    {label: 'Completed', value: 'Completed'},
-  ]
-
   const assignSearchValue = (name, value) => {
     setSearch((searchs) => ({
       ...searchs,
@@ -263,11 +325,11 @@ export default function ETenancyPage() {
     <div className='etenant-page'>
       <div className='td-filter-group'>
         <select
-          defaultValue={statusOptions[0]}
+          defaultValue={setupData.etenancyStatus[0]}
           className='form-select td-filter-select'
           ref={statusRef}
         >
-          {statusOptions.map((status, index) => {
+          {setupData.etenancyStatus.map((status, index) => {
             return (
               <option key={index} value={status.value}>
                 {status.label}
@@ -291,7 +353,7 @@ export default function ETenancyPage() {
           <button
             className='td-filter-search-btn'
             type='submit'
-            // onClick={handleSearch}
+            onClick={handleSearch}
           >
             Search
           </button>
@@ -300,7 +362,7 @@ export default function ETenancyPage() {
 
       <div className='td-header-btn-group'>
         <span>{pageSummary.records} records</span>
-        <button className='btn btn-primary' onClick={createNewETenancy}>
+        <button className='btn btn-primary' onClick={createNewEtenancy}>
           New E-Tenancy
         </button>
       </div>
@@ -312,7 +374,7 @@ export default function ETenancyPage() {
           hasMore={page < pageSummary?.pages}
           next={handleLoadMore}
           loader={
-            <p style={{textAlign: 'center'}} className='text-muted text-center'>
+            <p style={{ textAlign: 'center' }} className='text-muted text-center'>
               Loading data...
             </p>
           }
@@ -321,7 +383,7 @@ export default function ETenancyPage() {
               <small> Looks like you've reached the end </small>
             </p>
           }
-          // style={{ overflow: "hidden" }}
+        // style={{ overflow: "hidden" }}
         >
           <table
             id='kt_datatable_vertical_scroll'
@@ -359,13 +421,13 @@ export default function ETenancyPage() {
                     <td>
                       <DropdownButton variant='primary' id='dropdown-basic-button' title='Action'>
                         <Dropdown.Item onClick={() => handleSelectedEtenancy(agreement?._id)}>
-                          Edit Tenancy Agreement
+                          Edit Form
                         </Dropdown.Item>
-                        <Dropdown.Item onClick={() => handleSignatureModal(agreement?._id)}>
-                          Sign Tenancy Agreement
+                        <Dropdown.Item onClick={() => handleSignModal(agreement?._id)}>
+                          Manager Sign
                         </Dropdown.Item>
                         <Dropdown.Item onClick={() => handleDownloadPDF(agreement?._id)}>
-                          Download Tenancy Agreement
+                          Download Agreement
                         </Dropdown.Item>
                       </DropdownButton>
                     </td>
@@ -433,24 +495,26 @@ export default function ETenancyPage() {
                     <Formik
                       enableReinitialize
                       initialValues={
-                        eTenancyFormMode === modeNew ? initialEtenancyFormData : etenancyFormData
+                        eTenancyFormMode === modeNew ? newEtenancyFormData : etenancyFormData
                       }
-                      // validationSchema={validationSchema1}
-                      onSubmit={async (values, {setSubmitting}) => {
+                      validationSchema={validationSchema}
+                      onSubmit={async (values, { setSubmitting }) => {
                         setSubmitting(false)
                         setLoading(true)
 
-                        let updatedValues = {}
+                        let updatedValues = {             
+                        }                        
 
                         if (eTenancyFormMode === modeNew) {
                           updatedValues = {
                             ...values,
+                            hostName: userSlice.personal.name,
+                            hostIdentityNo: userSlice.personal.identity.number,
                             dateOfAgreement: new Date(),
                           }
                         } else {
                           updatedValues = {
-                            ...values,
-                            ...etenancyFormData,
+                            ...values,                          
                           }
                         }
 
@@ -463,14 +527,14 @@ export default function ETenancyPage() {
 
                           if (result) {
                             // Convert Uint8Array to Blob
-                            const pdfBlob = new Blob([result], {type: 'application/pdf'})
+                            const pdfBlob = new Blob([result], { type: 'application/pdf' })
                             // Create a Blob URL
                             const blobUrl = URL.createObjectURL(pdfBlob)
                             // Set the Blob URL to the state
                             setAgreementPDF(blobUrl)
                           }
                         } catch (err) {
-                          lib.log(err)
+                          throw err
                         } finally {
                           setLoading(false)
                         }
@@ -516,6 +580,11 @@ export default function ETenancyPage() {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                       />
+                                      {touched.propertyAddress && errors.propertyAddress && (
+                                        <span className='formik-error-msg'>
+                                          {errors.propertyAddress}
+                                        </span>
+                                      )}
                                     </Col>
                                   </Form.Group>
                                 </Col>
@@ -538,9 +607,15 @@ export default function ETenancyPage() {
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                       />
+                                      {touched.monthlyRental && errors.monthlyRental && (
+                                        <span className='formik-error-msg'>
+                                          {errors.monthlyRental}
+                                        </span>
+                                      )}
                                     </Col>
                                   </Form.Group>
                                 </Col>
+
                               </Row>
                             </div>
                             <hr />
@@ -551,7 +626,7 @@ export default function ETenancyPage() {
                                   <Form.Group
                                     as={Row}
                                     className='mb-3 align-items-center'
-                                    controlId='tenantName1'
+                                    controlId='tenantName'
                                   >
                                     <Form.Label column md='4'>
                                       <span className='required'>Name</span> :
@@ -561,13 +636,13 @@ export default function ETenancyPage() {
                                         type='text'
                                         size='sm'
                                         placeholder='Tenant Name'
-                                        defaultValue={values.tenantName1}
+                                        defaultValue={values.tenantName}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                       />
-                                      {touched.tenantName1 && errors.tenantName1 && (
+                                      {touched.tenantName && errors.tenantName && (
                                         <span className='formik-error-msg'>
-                                          {errors.tenantName1}
+                                          {errors.tenantName}
                                         </span>
                                       )}
                                     </Col>
@@ -576,7 +651,7 @@ export default function ETenancyPage() {
                                   <Form.Group
                                     as={Row}
                                     className='mb-3 align-items-center'
-                                    controlId='tenantIdentityNo1'
+                                    controlId='tenantIdentityNo'
                                   >
                                     <Form.Label column md='4'>
                                       <span className='required'>NRIC</span> :
@@ -586,10 +661,15 @@ export default function ETenancyPage() {
                                         type='text'
                                         size='sm'
                                         placeholder='NRIC'
-                                        defaultValue={values.tenantIdentityNo1}
+                                        defaultValue={values.tenantIdentityNo}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                       />
+                                      {touched.tenantIdentityNo && errors.tenantIdentityNo && (
+                                        <span className='formik-error-msg'>
+                                          {errors.tenantIdentityNo}
+                                        </span>
+                                      )}
                                     </Col>
                                   </Form.Group>
                                 </Col>
@@ -598,7 +678,7 @@ export default function ETenancyPage() {
                                   <Form.Group
                                     as={Row}
                                     className='mb-3 align-items-center'
-                                    controlId='tenantEmail1'
+                                    controlId='tenantEmail'
                                   >
                                     <Form.Label column md='4'>
                                       <span className='required'>Email Address</span> :
@@ -608,17 +688,22 @@ export default function ETenancyPage() {
                                         type='text'
                                         size='sm'
                                         placeholder='Email Address'
-                                        defaultValue={values.tenantEmail1}
+                                        defaultValue={values.tenantEmail}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                       />
+                                      {touched.tenantEmail && errors.tenantEmail && (
+                                        <span className='formik-error-msg'>
+                                          {errors.tenantEmail}
+                                        </span>
+                                      )}
                                     </Col>
                                   </Form.Group>
 
                                   <Form.Group
                                     as={Row}
                                     className='mb-3 align-items-center'
-                                    controlId='tenantMobile1'
+                                    controlId='tenantMobile'
                                   >
                                     <Form.Label column md='4'>
                                       <span className='required'>Contact No.</span> :
@@ -628,10 +713,15 @@ export default function ETenancyPage() {
                                         type='text'
                                         size='sm'
                                         placeholder='Contact No'
-                                        defaultValue={values.tenantMobile1}
+                                        defaultValue={values.tenantMobile}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                       />
+                                      {touched.tenantMobile && errors.tenantMobile && (
+                                        <span className='formik-error-msg'>
+                                          {errors.tenantMobile}
+                                        </span>
+                                      )}
                                     </Col>
                                   </Form.Group>
                                 </Col>
@@ -826,7 +916,7 @@ export default function ETenancyPage() {
                                   controlId='accessCardDeposit'
                                 >
                                   <Form.Label column md='4'>
-                                    <span className='required'>Access Card Deposit (RM)</span> :
+                                    <span className=''>Access Card Deposit (RM)</span> :
                                   </Form.Label>
                                   <Col column md='8'>
                                     <Form.Control
@@ -851,7 +941,7 @@ export default function ETenancyPage() {
                                   controlId='parkingCardDeposit'
                                 >
                                   <Form.Label column md='4'>
-                                    <span className='required'>Parking Card Deposit (RM)</span> :
+                                    <span className=''>Parking Card Deposit (RM)</span> :
                                   </Form.Label>
                                   <Col column md='8'>
                                     <Form.Control
@@ -903,17 +993,15 @@ export default function ETenancyPage() {
                         let result
                         // console.log(etenancyFormData)
                         try {
-                          if (eTenancyFormMode === modeEdit) {
-                            console.log('EDITING')
+                          if (eTenancyFormMode === modeEdit) {                            
                             result = await etenancyBiz.edit(etenancyFormData)
                             if (result) toast.success(`e-Tenancy updated successfully`)
-                          } else {
-                            console.log('SAVING')
+                          } else {                           
                             result = await etenancyBiz.create(etenancyFormData)
                             if (result) toast.success('New e-tenancy saved successfully')
                           }
                         } catch (err) {
-                          toast.error(setupData.systemErrorMessage)
+                          toast.error(setupData.systemErrorMsg)
                         } finally {
                           getEtenancyList()
                           toggleEtancyFormModal()
@@ -942,7 +1030,7 @@ export default function ETenancyPage() {
                         return (
                           <div className='e-tenancy-pdf-preview-wrapper'>
                             {loading && (
-                              <span className='indicator-progress' style={{display: 'block'}}>
+                              <span className='indicator-progress' style={{ display: 'block' }}>
                                 Please wait...
                                 <span className='spinner-border spinner-border-sm align-middle ms-2'></span>
                               </span>
@@ -998,8 +1086,8 @@ export default function ETenancyPage() {
         tabIndex={-1}
         aria-hidden='true'
         dialogClassName='modal-dialog modal-dialog-centered mw-624px'
-        show={signatureModal}
-        onHide={toggleSignatureModal}
+        show={signModal}
+        onHide={toggleSignModal}
         backdrop={true}
         size='md'
       >
@@ -1014,7 +1102,7 @@ export default function ETenancyPage() {
               }}
               minWidth={1}
               maxWidth={1.3}
-              canvasProps={{className: 'signature-canvas'}}
+              canvasProps={{ className: 'signature-canvas' }}
             />
           </div>
 
@@ -1023,14 +1111,14 @@ export default function ETenancyPage() {
             <button
               className='auth-forgot-button'
               type='button'
-              onClick={() => signatureImage.clear()}
+              onClick={() => signRef.clear()}
             >
               clear
             </button>
           </div>
 
-          <div className='d-grid mb-10'>
-            <button type='button' className='btn auth-sign-in-button' onClick={handleSignAgreement}>
+          <div className='mb-10 d-flex justify-content-center'>
+            <button type='button' className='btn btn-lg btn-primary' onClick={handleSignAgreement}>
               <span className='indicator-label'>Confirm</span>
             </button>
           </div>
