@@ -53,26 +53,26 @@ const SidebarLogo = (props: PropsType) => {
         {config.layoutType === 'dark-sidebar' ? (
           <img
             alt='Portal Logo'
-            src={toAbsoluteUrl('/media/auth/portal_logo.svg')}
+            src={toAbsoluteUrl('/media/sidebar/portal_logo_mini.png')}
             className='app-sidebar-logo-default'
           />
         ) : (
           <>
             <img
               alt='Portal Logo'
-              src={toAbsoluteUrl('/media/auth/portal_logo.svg')}
+              src={toAbsoluteUrl('/media/sidebar/portal_logo_mini.png')}
               className='app-sidebar-logo-default theme-light-show'
             />
             <img
               alt='Portal Logo'
-              src={toAbsoluteUrl('/media/auth/portal_logo.svg')}
+              src={toAbsoluteUrl('/media/sidebar/portal_logo_mini.png')}
               className='app-sidebar-logo-default theme-dark-show'
             />
           </>
         )}
         <img
           alt='Portal Emblem'
-          src={toAbsoluteUrl('/media/sidebar/portal_logo_mini.svg')}
+          src={toAbsoluteUrl('/media/sidebar/portal_logo_mini.png')}
           className='app-sidebar-logo-minimize'
         />
       </Link>
